@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="hero">
+  <h1>📚 Find What You Need</h1>
+  <p>Rent or buy items from fellow students</p>
+</div>
+
+<!-- Search + Filter -->
+<form method="GET" class="search-bar">
+  <input type="text" name="q" value="{{ query }}" placeholder="🔍 Search items...">
+  <select name="category">
+    <option value="">All Categories</option>
+    <option value="rent" {% if category == 'rent' %}selected{% endif %}>🔄 For Rent</option>
+    <option value="sell" {% if category == 'sell' %}selected{% endif %}>🛒 For Sale</option>
+  </select>
+  <button type="submit" class="btn">Search</button>
+</form>
+
+<!-- Item Grid -->
+<div class="item-grid">
+  {% for item in items %}
+  <div class="card">
+    {% if item.image %}
+      <img src="{{ item.image.url }}" alt="{{ item.title }}">
+    {% else %}
+      <div class="no-image">📦 No Image</div>
+    {% endif %}
+    <div class="card-body">
+      <span class="badge {% if item.category == 'rent' %}badge-rent{% else %}badge-sell{% endif %}">
+        {% if item.category == 'rent' %}🔄 Rent{% else %}🛒 Sell{% endif %}
+      </span>
+      <h3>{{ item.title }}</h3>
+      <p class="item-desc">{{ item.description|truncatechars:60 }}</p>
+      <div class="card-footer">
+        <span class="price">৳{{ item.price }}</span>
+        <a href="{% url 'item_detail' item.pk %}" class="btn small">View →</a>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="empty-state">
+    <p>😕 No items found.</p>
+    {% if user.is_authenticated %}
+      <a href="{% url 'add_item' %}" class="btn">Be the first to post!</a>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock %}

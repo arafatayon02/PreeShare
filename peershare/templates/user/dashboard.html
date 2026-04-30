@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<!-- Dashboard Header -->
+<div class="dash-header">
+  {% if profile.profile_pic %}
+    <img src="{{ profile.profile_pic.url }}" class="avatar-lg" alt="pic">
+  {% else %}
+    <div class="avatar-placeholder-lg">{{ request.user.username|first|upper }}</div>
+  {% endif %}
+  <div class="dash-header-info">
+    <h2>👋 Welcome, {{ request.user.username }}</h2>
+    <p>🎓 {{ profile.get_university_display|default:"University not set" }}</p>
+    <div class="dash-actions">
+      <a href="{% url 'edit_profile' %}" class="btn small">✏️ Edit Profile</a>
+      <a href="{% url 'my_profile' %}" class="btn small outline">👁 View Profile</a>
+      <a href="{% url 'add_item' %}" class="btn small">+ Add Item</a>
+    </div>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="stats-bar">
+  <div class="stat-box">
+    <span class="stat-num">{{ my_items.count }}</span>
+    <span class="stat-label">Items Posted</span>
+  </div>
+  <div class="stat-box">
+    <span class="stat-num">{{ my_bookings.count }}</span>
+    <span class="stat-label">Bookings Made</span>
+  </div>
+  <div class="stat-box">
+    <span class="stat-num">{{ my_reviews.count }}</span>
+    <span class="stat-label">Reviews Given</span>
+  </div>
+  <div class="stat-box">
+    <span class="stat-num">{{ profile.get_average_rating|default:"—" }}</span>
+    <span class="stat-label">Avg Rating</span>
+  </div>
+</div>
+
+<!-- My Items -->
+<div class="section-card">
+  <div class="section-top">
+    <h3>📦 My Items</h3>
+    <a href="{% url 'add_item' %}" class="btn small">+ Add New</a>
+  </div>
+  {% if my_items %}
+  <div class="mini-grid">
+    {% for item in my_items %}
+    <div class="mini-card">
+      {% if item.image %}
+        <img src="{{ item.image.url }}" alt="{{ item.title }}">
+      {% else %}
+        <div class="mini-no-img">📦</div>
+      {% endif %}
+      <div class="mini-body">
+        <strong>{{ item.title }}</strong>
+        <span class="badge">{{ item.get_category_display }}</span>
+        <p class="price">৳{{ item.price }}</p>
+        <a href="{% url 'item_detail' item.pk %}" class="btn small">View</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+    <p class="empty-msg">No items posted yet. <a href="{% url 'add_item' %}">Post one →</a></p>
+  {% endif %}
+</div>
+
+<!-- My Bookings -->
+<div class="section-card">
+  <h3>📅 My Bookings</h3>
+  {% if my_bookings %}
+  <table class="table">
+    <thead>
+      <tr><th>Item</th><th>Days</th><th>Total</th><th>Date</th></tr>
+    </thead>
+    <tbody>
+      {% for b in my_bookings %}
+      <tr>
+        <td><a href="{% url 'item_detail' b.item.pk %}">{{ b.item.title }}</a></td>
+        <td>{{ b.days }} days</td>
+        <td>৳{{ b.total_price }}</td>
+        <td>{{ b.booked_at|date:"d M Y" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p class="empty-msg">No bookings yet.</p>
+  {% endif %}
+</div>
+
+<!-- My Reviews -->
+<div class="section-card">
+  <h3>⭐ Reviews I Gave</h3>
+  {% if my_reviews %}
+    {% for r in my_reviews %}
+    <div class="review-item">
+      <strong><a href="{% url 'item_detail' r.item.pk %}">{{ r.item.title }}</a></strong>
+      — {{ r.rating }}★
+      <p>{{ r.comment }}</p>
+      <small>{{ r.created_at|date:"d M Y" }}</small>
+    </div>
+    {% endfor %}
+  {% else %}
+    <p class="empty-msg">No reviews given yet.</p>
+  {% endif %}
+</div>
+
+{% endblock %}

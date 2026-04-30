@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="page-header">
+  <h2>👥 All Students</h2>
+  <p>Find and connect with other students</p>
+</div>
+
+<form method="GET" class="search-bar">
+  <input type="text" name="q" value="{{ search }}" placeholder="🔍 Search by username...">
+  <button type="submit" class="btn">Search</button>
+</form>
+
+<div class="user-grid">
+  {% for profile in profiles %}
+  <div class="user-card">
+    {% if profile.profile_pic %}
+      <img src="{{ profile.profile_pic.url }}" class="avatar" alt="pic">
+    {% else %}
+      <div class="avatar-placeholder">{{ profile.user.username|first|upper }}</div>
+    {% endif %}
+    <div class="user-card-info">
+      <h4>{{ profile.user.username }}</h4>
+      <p>🎓 {{ profile.get_university_display|default:"—" }}</p>
+      {% if profile.location %}<p>📍 {{ profile.location }}</p>{% endif %}
+      <p>📦 {{ profile.get_total_items }} items</p>
+    </div>
+    <div class="user-card-actions">
+      <a href="{% url 'public_profile' profile.user.username %}" class="btn small">View Profile</a>
+      {% if request.user.is_authenticated and request.user != profile.user %}
+        <a href="{% url 'chat' profile.user.pk %}" class="btn small outline">💬 Chat</a>
+      {% endif %}
+    </div>
+  </div>
+  {% empty %}
+    <p class="empty-msg">No students found.</p>
+  {% endfor %}
+</div>
+
+{% endblock %}

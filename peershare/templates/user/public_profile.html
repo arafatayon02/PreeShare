@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="profile-card">
+  <div class="profile-top">
+    {% if profile.profile_pic %}
+      <img src="{{ profile.profile_pic.url }}" class="avatar-lg" alt="pic">
+    {% else %}
+      <div class="avatar-placeholder-lg">{{ viewed_user.username|first|upper }}</div>
+    {% endif %}
+    <div class="profile-info">
+      <h2>{{ viewed_user.username }}</h2>
+      <p class="univ-tag">🎓 {{ profile.get_university_display|default:"University not set" }}</p>
+      {% if profile.location %}<p>📍 {{ profile.location }}</p>{% endif %}
+      <p>📦 {{ profile.get_total_items }} items posted</p>
+      {% if profile.get_average_rating %}
+        <p>⭐ {{ profile.get_average_rating }} avg rating</p>
+      {% endif %}
+      <p>🗓 Member since {{ profile.joined_at|date:"M Y" }}</p>
+    </div>
+  </div>
+
+  {% if profile.bio %}
+  <div class="bio-box">
+    <h4>About</h4>
+    <p>{{ profile.bio }}</p>
+  </div>
+  {% endif %}
+
+  {% if request.user.is_authenticated and request.user != viewed_user %}
+  <div class="profile-actions">
+    <a href="{% url 'chat' viewed_user.pk %}" class="btn">💬 Send Message</a>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Their Items -->
+<div class="section-card">
+  <h3>📦 Items by {{ viewed_user.username }}</h3>
+  {% if user_items %}
+  <div class="mini-grid">
+    {% for item in user_items %}
+    <div class="mini-card">
+      {% if item.image %}
+        <img src="{{ item.image.url }}" alt="{{ item.title }}">
+      {% else %}
+        <div class="mini-no-img">📦</div>
+      {% endif %}
+      <div class="mini-body">
+        <strong>{{ item.title }}</strong>
+        <span class="badge">{{ item.get_category_display }}</span>
+        <p class="price">৳{{ item.price }}</p>
+        <a href="{% url 'item_detail' item.pk %}" class="btn small">View</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+    <p class="empty-msg">No items posted yet.</p>
+  {% endif %}
+</div>
+
+{% endblock %}
