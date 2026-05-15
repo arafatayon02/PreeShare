@@ -5,7 +5,11 @@ from .models import Profile
 class ProfileForm(forms.ModelForm):
     class Meta:
         model  = Profile
-        fields = ['bio', 'profile_pic', 'university', 'phone', 'location']
+        fields = [
+            'bio', 'profile_pic',
+            'university', 'phone', 'location'
+        ]
+
         widgets = {
             'bio': forms.Textarea(attrs={
                 'rows': 4,

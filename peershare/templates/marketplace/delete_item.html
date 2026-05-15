@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="delete-page">
+
+  <!-- Warning Icon -->
+  <div class="delete-icon-wrap">
+    <div class="delete-circle">🗑️</div>
+  </div>
+
+  <h2 class="delete-title">Delete Item</h2>
+  <p class="delete-sub">
+    Are you sure you want to delete this item?
+    <br>
+    <strong>This action cannot be undone.</strong>
+  </p>
+
+  <!-- Item Preview Card -->
+  <div class="delete-preview-card">
+    <div class="delete-item-row">
+      {% if item.image %}
+        <img src="{{ item.image.url }}"
+             class="delete-item-img"
+             alt="{{ item.title }}">
+      {% else %}
+        <div class="delete-item-no-img">📦</div>
+      {% endif %}
+      <div class="delete-item-info">
+        <h4>{{ item.title }}</h4>
+        <p>{{ item.description|truncatechars:80 }}</p>
+        <div class="delete-item-meta">
+          <span class="badge
+            {% if item.category == 'rent' %}badge-rent
+            {% elif item.category == 'sell' %}badge-sell
+            {% else %}badge-both{% endif %}">
+            {{ item.get_category_display }}
+          </span>
+          <span class="price">৳{{ item.price }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Warning Box -->
+  <div class="delete-warning-box">
+    <strong>⚠️ Warning:</strong> Deleting this item will also
+    remove all its reviews, bookings, and payment records
+    permanently.
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="delete-actions">
+
+    <!-- Confirm Delete -->
+    <form method="POST">
+      {% csrf_token %}
+      <button type="submit"
+              class="btn delete-confirm-btn full-btn">
+        🗑️ Yes, Delete This Item
+      </button>
+    </form>
+
+    <!-- Cancel -->
+    <a href="/dashboard/items/"
+       class="btn outline full-btn delete-cancel-btn">
+      ← Cancel, Keep Item
+    </a>
+
+  </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="page-head">
+  <div>
+    <h2>🔄 Incoming Rentals</h2>
+    <p>Students who rented your items</p>
+  </div>
+  <a href="/dashboard/" class="btn outline small">← Dashboard</a>
+</div>
+
+{% if incoming %}
+<div class="list-stack">
+  {% for b in incoming %}
+  <div class="list-card">
+    {% if b.item.image %}
+      <img src="{{ b.item.image.url }}" class="list-thumb">
+    {% else %}
+      <div class="list-thumb-empty">🔄</div>
+    {% endif %}
+    <div class="list-info">
+      <h3>
+        <a href="/item/{{ b.item.pk }}/">{{ b.item.title }}</a>
+      </h3>
+      <p>Rented by:
+        <a href="/user/{{ b.renter.username }}/">
+          {{ b.renter.username }}
+        </a>
+      </p>
+      <p>Duration: <strong>{{ b.days }} days</strong></p>
+      <p>Date: {{ b.booked_at|date:"d M Y" }}</p>
+    </div>
+    <div class="list-right">
+      <p class="price-lg">৳{{ b.total_price }}</p>
+      <span class="sbadge sbadge-{{ b.status }}">
+        {{ b.get_status_display }}
+      </span>
+      <a href="/chat/{{ b.renter.pk }}/"
+         class="btn small">💬 Chat Renter</a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+  <div class="empty-icon">🔄</div>
+  <p>No incoming rentals yet.</p>
+  <a href="/add/" class="btn">Post a Rental Item →</a>
+</div>
+{% endif %}
+
+{% endblock %}

@@ -3,44 +3,54 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PeerShare</title>
+  <title>PeerShare 🎓</title>
   {% load static %}
   <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
 
+
+<!-- NAVBAR -->
 <nav class="navbar">
-  <a href="{% url 'home' %}" class="logo">🎓 PeerShare</a>
+  <a href="/" class="logo">🎓 PeerShare</a>
   <div class="nav-links">
     {% if user.is_authenticated %}
-      <a href="{% url 'home' %}">Browse</a>
-      <a href="{% url 'add_item' %}">+ Add Item</a>
-      <a href="{% url 'all_users' %}">👥 Students</a>
-      <a href="{% url 'dashboard' %}">📊 Dashboard</a>
-      <a href="{% url 'my_profile' %}">👤 {{ user.username }}</a>
-      <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
+      <a href="/">🏠 Browse</a>
+      <a href="/add/">➕ Post Item</a>
+      <a href="/user/all/">👥 Students</a>
+      <a href="/dashboard/">📊 Dashboard</a>
+      <a href="/user/profile/" class="nav-profile">
+        👤 {{ user.username }}
+      </a>
+      <a href="/login/logout/" class="nav-logout">Logout</a>
     {% else %}
-      <a href="{% url 'login' %}">Login</a>
-      <a href="{% url 'register' %}" class="btn-nav">Register</a>
+      <a href="/login/">Login</a>
+      <a href="/login/register/" class="nav-register">Register</a>
     {% endif %}
   </div>
 </nav>
 
-<!-- Flash Messages -->
+<!-- FLASH MESSAGES -->
 {% if messages %}
-<div class="messages-container">
+<div class="flash-container">
   {% for message in messages %}
-    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    <div class="flash flash-{{ message.tags }}">
+      {{ message }}
+      <button class="flash-close"
+              onclick="this.parentElement.remove()">✕</button>
+    </div>
   {% endfor %}
 </div>
 {% endif %}
 
+<!-- MAIN CONTENT -->
 <div class="container">
   {% block content %}{% endblock %}
 </div>
 
+<!-- FOOTER -->
 <footer class="footer">
-  <p>🎓 PeerShare — Student Marketplace © 2025</p>
+  <p>🎓 PeerShare — Student Marketplace &copy; 2025</p>
 </footer>
 
 </body>

@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="page-header">
+  <h2>➕ Post an Item</h2>
+  <p>Share something for rent or sale with fellow students</p>
+</div>
+
+<div class="form-container">
+  <form method="POST"
+        enctype="multipart/form-data"
+        class="form-box">
+    {% csrf_token %}
+    {% for field in form %}
+    <div class="field-group">
+      <label>{{ field.label }}</label>
+      {{ field }}
+      {% if field.help_text %}
+        <small class="help-text">{{ field.help_text }}</small>
+      {% endif %}
+      {% for error in field.errors %}
+        <span class="field-error">⚠ {{ error }}</span>
+      {% endfor %}
+    </div>
+    {% endfor %}
+    <div class="form-actions">
+      <button type="submit" class="btn">📤 Post Item</button>
+      <a href="/" class="btn outline">Cancel</a>
+    </div>
+  </form>
+</div>
+
+{% endblock %}

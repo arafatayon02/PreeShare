@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="page-head">
+  <div>
+    <h2>🛒 My Purchases</h2>
+    <p>All items you have bought</p>
+  </div>
+  <a href="/dashboard/" class="btn outline small">← Dashboard</a>
+</div>
+
+{% if purchases %}
+<div class="list-stack">
+  {% for p in purchases %}
+  <div class="list-card">
+    {% if p.item.image %}
+      <img src="{{ p.item.image.url }}" class="list-thumb">
+    {% else %}
+      <div class="list-thumb-empty">📦</div>
+    {% endif %}
+    <div class="list-info">
+      <h3>
+        <a href="/item/{{ p.item.pk }}/">{{ p.item.title }}</a>
+      </h3>
+      <p>Seller:
+        <a href="/user/{{ p.item.owner.username }}/">
+          {{ p.item.owner.username }}
+        </a>
+      </p>
+      <p>Date: {{ p.purchased_at|date:"d M Y, H:i" }}</p>
+    </div>
+    <div class="list-right">
+      <p class="price-lg">৳{{ p.price_paid }}</p>
+      <span class="sbadge sbadge-{{ p.status }}">
+        {{ p.get_status_display }}
+      </span>
+      <a href="/chat/{{ p.item.owner.pk }}/"
+         class="btn small">💬 Chat Seller</a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+  <div class="empty-icon">🛒</div>
+  <p>No purchases yet.</p>
+  <a href="/" class="btn">Browse Items →</a>
+</div>
+{% endif %}
+
+{% endblock %}

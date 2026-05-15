@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<!-- Top Bar -->
+<div class="db-topbar">
+  <div class="db-user-info">
+    {% if profile.profile_pic %}
+      <img src="{{ profile.profile_pic.url }}"
+           class="avatar-lg">
+    {% else %}
+      <div class="avatar-lg-placeholder">
+        {{ request.user.username|first|upper }}
+      </div>
+    {% endif %}
+    <div>
+      <h2>👋 {{ request.user.username }}</h2>
+      <p>🎓 {{ profile.get_university_display|default:"Set your university" }}</p>
+      {% if profile.location %}
+        <p>📍 {{ profile.location }}</p>
+      {% endif %}
+    </div>
+  </div>
+  <div class="db-top-btns">
+    <a href="/add/" class="btn">➕ Add Item</a>
+    <a href="/user/profile/edit/"
+       class="btn outline">✏️ Edit Profile</a>
+  </div>
+</div>
+
+<!-- Stat Cards -->
+<div class="stats-grid">
+  <div class="stat-card stat-blue">
+    <span class="s-icon">📦</span>
+    <span class="s-num">{{ my_items.count }}</span>
+    <span class="s-lbl">Items Posted</span>
+  </div>
+  <div class="stat-card stat-green">
+    <span class="s-icon">🛒</span>
+    <span class="s-num">{{ purchases.count }}</span>
+    <span class="s-lbl">Purchased</span>
+  </div>
+  <div class="stat-card stat-orange">
+    <span class="s-icon">📅</span>
+    <span class="s-num">{{ bookings.count }}</span>
+    <span class="s-lbl">Rented</span>
+  </div>
+  <div class="stat-card stat-purple">
+    <span class="s-icon">💬</span>
+    <span class="s-num">{{ chat_users.count }}</span>
+    <span class="s-lbl">Conversations</span>
+  </div>
+</div>
+
+<!-- Money Summary -->
+<div class="money-row">
+  <div class="money-card">
+    <p class="money-label">💸 Spent on Purchases</p>
+    <p class="money-val">৳{{ total_spent }}</p>
+  </div>
+  <div class="money-card">
+    <p class="money-label">🔄 Spent on Rentals</p>
+    <p class="money-val">৳{{ total_rent }}</p>
+  </div>
+</div>
+
+<!-- Quick Nav -->
+<div class="quick-nav">
+  <a href="/dashboard/items/"     class="qnav-btn">📦 My Items</a>
+  <a href="/dashboard/purchases/" class="qnav-btn">🛒 Purchases</a>
+  <a href="/dashboard/bookings/"  class="qnav-btn">📅 Bookings</a>
+  <a href="/dashboard/rentals/"   class="qnav-btn">🔄 Rentals In</a>
+  <a href="/dashboard/chats/"     class="qnav-btn">💬 Chats</a>
+  <a href="/user/profile/"        class="qnav-btn">👤 My Profile</a>
+</div>
+
+<!-- Recent Items -->
+<div class="db-section">
+  <div class="db-sec-head">
+    <h3>📦 My Recent Items</h3>
+    <a href="/dashboard/items/" class="btn small">See All →</a>
+  </div>
+  {% if my_items %}
+  <div class="mini-grid">
+    {% for item in my_items|slice:":4" %}
+    <div class="mini-card">
+      {% if item.image %}
+        <img src="{{ item.image.url }}" alt="{{ item.title }}">
+      {% else %}
+        <div class="mini-no-img">📦</div>
+      {% endif %}
+      <div class="mini-body">
+        <strong>{{ item.title }}</strong>
+        <span class="badge">{{ item.get_category_display }}</span>
+        <p class="price">৳{{ item.price }}</p>
+        <a href="/item/{{ item.pk }}/" class="btn small">View</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+    <p class="empty-msg">
+      No items yet.
+      <a href="/add/">Post your first item →</a>
+    </p>
+  {% endif %}
+</div>
+
+<!-- Recent Purchases -->
+<div class="db-section">
+  <div class="db-sec-head">
+    <h3>🛒 Recent Purchases</h3>
+    <a href="/dashboard/purchases/" class="btn small">See All →</a>
+  </div>
+  {% if purchases %}
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Item</th><th>Price</th>
+        <th>Status</th><th>Date</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for p in purchases|slice:":4" %}
+      <tr>
+        <td>
+          <a href="/item/{{ p.item.pk }}/">
+            {{ p.item.title }}
+          </a>
+        </td>
+        <td>৳{{ p.price_paid }}</td>
+        <td>
+          <span class="sbadge sbadge-{{ p.status }}">
+            {{ p.get_status_display }}
+          </span>
+        </td>
+        <td>{{ p.purchased_at|date:"d M Y" }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p class="empty-msg">No purchases yet.</p>
+  {% endif %}
+</div>
+
+<!-- Recent Bookings -->
+<div class="db-section">
+  <div class="db-sec-head">
+    <h3>📅 Recent Bookings</h3>
+    <a href="/dashboard/bookings/" class="btn small">See All →</a>
+  </div>
+  {% if bookings %}
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Item</th><th>Days</th>
+        <th>Total</th><th>Status</th><th>Date</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for b in bookings|slice:":4" %}
+      <tr>
+        <td>
+          <a href="/item/{{ b.item.pk }}/">
+            {{ b.item.title }}
+          </a>
+        </td>
+        <td>{{ b.days }}</td>
+        <td>৳{{ b.total_price }}</td>
+        <td>
+          <span class="sbadge sbadge-{{ b.status }}">
+            {{ b.get_status_display }}
+          </span>
+        </td>
+        <td>{{ b.booked_at|date:"d M Y" }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p class="empty-msg">No bookings yet.</p>
+  {% endif %}
+</div>
+
+<!-- Recent Chats -->
+<div class="db-section">
+  <div class="db-sec-head">
+    <h3>💬 Recent Chats</h3>
+    <a href="/dashboard/chats/" class="btn small">See All →</a>
+  </div>
+  {% if chat_users %}
+  <div class="chat-previews">
+    {% for u in chat_users|slice:":4" %}
+    <a href="/chat/{{ u.pk }}/" class="chat-preview-item">
+      <div class="avatar-placeholder">
+        {{ u.username|first|upper }}
+      </div>
+      <span>{{ u.username }}</span>
+      <span class="chat-arrow">→</span>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+    <p class="empty-msg">No chats yet.</p>
+  {% endif %}
+</div>
+
+{% endblock %}

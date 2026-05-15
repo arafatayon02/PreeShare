@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="page-head">
+  <div>
+    <h2>💬 All Conversations</h2>
+    <p>Your message history</p>
+  </div>
+  <a href="/dashboard/" class="btn outline small">← Dashboard</a>
+</div>
+
+{% if conversations %}
+<div class="conv-list">
+  {% for c in conversations %}
+  <a href="/chat/{{ c.user.pk }}/" class="conv-card">
+    <div class="avatar-lg-placeholder">
+      {{ c.user.username|first|upper }}
+    </div>
+    <div class="conv-body">
+      <h4>{{ c.user.username }}</h4>
+      {% if c.last_msg %}
+        <p class="conv-preview">
+          {% if c.last_msg.sender == request.user %}
+            <span class="you-tag">You:</span>
+          {% endif %}
+          {{ c.last_msg.message|truncatechars:55 }}
+        </p>
+        <small>{{ c.last_msg.timestamp|date:"d M, H:i" }}</small>
+      {% endif %}
+    </div>
+    <span class="conv-arr">→</span>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+  <div class="empty-icon">💬</div>
+  <p>No conversations yet.</p>
+  <a href="/user/all/" class="btn">Find Students →</a>
+</div>
+{% endif %}
+
+{% endblock %}

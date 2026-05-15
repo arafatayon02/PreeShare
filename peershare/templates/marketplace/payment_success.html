@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="success-page">
+
+  <div class="success-icon-wrap">
+    <div class="success-circle">✅</div>
+  </div>
+
+  <h2 class="success-title">Payment Successful!</h2>
+  <p class="success-sub">
+    Your
+    {% if payment.method == 'cod' %}
+      Cash on Delivery order
+    {% elif payment.method == 'card' %}
+      card payment of <strong>৳{{ payment.advance_amount|default:payment.amount }}</strong>
+    {% else %}
+      bKash payment of <strong>৳{{ payment.advance_amount|default:payment.amount }}</strong>
+    {% endif %}
+    has been confirmed.
+  </p>
+
+  <!-- Payment Details -->
+  <div class="success-card">
+
+    <div class="success-row">
+      <span>📦 Item</span>
+      <strong>{{ payment.item.title }}</strong>
+    </div>
+
+    <div class="success-row">
+      <span>💳 Payment Method</span>
+      {% if payment.method == 'cod' %}
+        <span class="method-pill pill-cod">🚚 Cash on Delivery</span>
+      {% elif payment.method == 'card' %}
+        <span class="method-pill pill-card">💳 Card (*{{ payment.card_last4 }})</span>
+      {% else %}
+        <span class="method-pill pill-bkash">
+          <span class="bkash-s">b</span> bKash
+        </span>
+      {% endif %}
+    </div>
+
+    <div class="success-row">
+      <span>🛍 Order Type</span>
+      {% if payment.payment_type == 'buy' %}
+        <span class="badge badge-sell">🛒 Purchase</span>
+      {% else %}
+        <span class="badge badge-rent">🔄 Rental</span>
+      {% endif %}
+    </div>
+
+    {% if payment.payment_type == 'rent' and payment.days %}
+    <div class="success-row">
+      <span>📅 Duration</span>
+      <strong>{{ payment.days }} days</strong>
+    </div>
+    {% endif %}
+
+    <div class="success-row">
+      <span>💰 Total Amount</span>
+      <strong>৳{{ payment.amount }}</strong>
+    </div>
+
+    {% if payment.payment_type == 'rent' %}
+    <div class="success-row highlight-success-row">
+      <span>⚡ Paid Now (50% advance)</span>
+      <strong class="success-amount">
+        ৳{{ payment.advance_amount }}
+      </strong>
+    </div>
+    <div class="success-row">
+      <span>📬 Remaining (on delivery)</span>
+      <strong>৳{{ payment.amount|floatformat:2 }}</strong>
+    </div>
+    {% else %}
+    <div class="success-row">
+      <span>💰 Amount</span>
+      <strong class="success-amount">
+        ৳{{ payment.amount }}
+      </strong>
+    </div>
+    {% endif %}
+
+    {% if payment.method == 'bkash' %}
+    <div class="success-row">
+      <span>📱 bKash Number</span>
+      <strong>{{ payment.bkash_number }}</strong>
+    </div>
+    <div class="success-row">
+      <span>🔑 TrxID</span>
+      <strong>{{ payment.bkash_txn_id }}</strong>
+    </div>
+    {% endif %}
+
+    <div class="success-row">
+      <span>🕐 Time</span>
+      <strong>{{ payment.paid_at|date:"d M Y, H:i" }}</strong>
+    </div>
+
+    <div class="success-row">
+      <span>✅ Status</span>
+      {% if payment.status == 'completed' %}
+        <span class="sbadge sbadge-confirmed">Completed</span>
+      {% else %}
+        <span class="sbadge sbadge-pending">Pending</span>
+      {% endif %}
+    </div>
+
+  </div>
+
+  <!-- Notice -->
+  {% if payment.payment_type == 'buy' %}
+    {% if payment.method == 'cod' %}
+    <div class="success-notice success-notice-orange">
+      🚚 Your order is placed! Pay <strong>৳{{ payment.amount }}</strong>
+      in cash when the seller delivers the item.
+      Contact the seller to arrange delivery.
+    </div>
+    {% else %}
+    <div class="success-notice success-notice-green">
+      🎉 Payment confirmed! <strong>{{ payment.item.title }}</strong>
+      is now yours. The item has been marked as sold.
+    </div>
+    {% endif %}
+  {% else %}
+  <div class="success-notice success-notice-blue">
+    📅 Booking confirmed for <strong>{{ payment.days }} days</strong>!
+    You paid <strong>50% advance (৳{{ payment.advance_amount }})</strong>.
+    Pay the remaining <strong>৳{{ payment.amount }}</strong>
+    when you receive the item.
+  </div>
+  {% endif %}
+
+  <!-- Buttons -->
+  <div class="success-actions">
+    {% if payment.payment_type == 'buy' %}
+      <a href="/dashboard/purchases/" class="btn">
+        🛒 View My Purchases
+      </a>
+    {% else %}
+      <a href="/dashboard/bookings/" class="btn">
+        📅 View My Bookings
+      </a>
+    {% endif %}
+    <a href="/chat/{{ payment.item.owner.pk }}/"
+       class="btn outline">
+      💬 Chat with Seller
+    </a>
+    <a href="/" class="btn outline">
+      🏠 Back to Home
+    </a>
+  </div>
+
+</div>
+
+{% endblock %}

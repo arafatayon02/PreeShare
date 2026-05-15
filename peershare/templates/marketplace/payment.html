@@ -1,0 +1,401 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="payment-page">
+
+  <!-- ── LEFT: Order Summary ── -->
+  <div class="order-summary">
+    <h3>🧾 Order Summary</h3>
+
+    <div class="order-item-card">
+      {% if item.image %}
+        <img src="{{ item.image.url }}"
+             class="order-item-img"
+             alt="{{ item.title }}">
+      {% else %}
+        <div class="order-item-no-img">📦</div>
+      {% endif %}
+      <div class="order-item-info">
+        <h4>{{ item.title }}</h4>
+        <p>{{ item.description|truncatechars:70 }}</p>
+        <p>Seller: <strong>{{ item.owner.username }}</strong></p>
+      </div>
+    </div>
+
+    <!-- Buy breakdown -->
+    {% if pay_type == 'buy' %}
+    <div class="order-breakdown">
+      <div class="order-row">
+        <span>Item Price</span>
+        <span>৳{{ amount }}</span>
+      </div>
+      <div class="order-row">
+        <span>Type</span>
+        <span class="badge badge-sell">🛒 Purchase</span>
+      </div>
+      <div class="order-total">
+        <span>Total</span>
+        <span class="total-price">৳{{ amount }}</span>
+      </div>
+    </div>
+
+    <!-- Rent breakdown -->
+    {% else %}
+    <div class="order-breakdown">
+      <div class="order-row">
+        <span>Price / Day</span>
+        <span>৳{{ item.price }}</span>
+      </div>
+      <div class="order-row">
+        <span>Days</span>
+        <span>{{ days }} days</span>
+      </div>
+      <div class="order-row">
+        <span>Total Rent</span>
+        <span>৳{{ amount }}</span>
+      </div>
+      <div class="order-row highlight-row">
+        <span>⚡ Advance (50% now)</span>
+        <span class="advance-price">৳{{ advance }}</span>
+      </div>
+      <div class="order-row">
+        <span>Remaining (on delivery)</span>
+        <span>৳{{ remaining }}</span>
+      </div>
+      <div class="order-total">
+        <span>Pay Now</span>
+        <span class="total-price">৳{{ advance }}</span>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="secure-note">
+      🔒 Your payment is secure and encrypted
+    </div>
+  </div>
+
+  <!-- ── RIGHT: Payment Methods ── -->
+  <div class="payment-form-box">
+
+    <div class="payment-header">
+      <h2>💳 Choose Payment Method</h2>
+      <p>Select how you want to pay</p>
+    </div>
+
+    <form method="POST" id="payForm">
+      {% csrf_token %}
+      <input type="hidden" name="payment_method"
+             id="hiddenMethod" value="">
+
+      <!-- ── METHOD SELECTOR TABS ── -->
+      <div class="method-tabs">
+
+        <!-- COD — only for BUY -->
+        {% if pay_type == 'buy' %}
+        <div class="method-tab"
+             id="tab-cod"
+             onclick="selectMethod('cod')">
+          <div class="method-tab-icon">🚚</div>
+          <div class="method-tab-label">
+            <strong>Cash on Delivery</strong>
+            <span>Pay when item arrives</span>
+          </div>
+          <div class="method-tab-check" id="check-cod"></div>
+        </div>
+        {% endif %}
+
+        <!-- CARD -->
+        <div class="method-tab"
+             id="tab-card"
+             onclick="selectMethod('card')">
+          <div class="method-tab-icon">💳</div>
+          <div class="method-tab-label">
+            <strong>Debit / Credit Card</strong>
+            <span>Visa, Mastercard, AMEX</span>
+          </div>
+          <div class="method-tab-check" id="check-card"></div>
+        </div>
+
+        <!-- BKASH -->
+        <div class="method-tab"
+             id="tab-bkash"
+             onclick="selectMethod('bkash')">
+          <div class="method-tab-icon bkash-icon">b</div>
+          <div class="method-tab-label">
+            <strong>bKash</strong>
+            <span>Send money via bKash</span>
+          </div>
+          <div class="method-tab-check" id="check-bkash"></div>
+        </div>
+
+      </div>
+
+      <!-- ── COD SECTION ── -->
+      {% if pay_type == 'buy' %}
+      <div class="method-section" id="section-cod">
+        <div class="cod-box">
+          <div class="cod-icon">🚚</div>
+          <h4>Cash on Delivery</h4>
+          <p>
+            You will pay <strong>৳{{ amount }}</strong>
+            in cash when the item is delivered to you.
+          </p>
+          <ul class="cod-list">
+            <li>✅ No upfront payment needed</li>
+            <li>✅ Pay only when you receive the item</li>
+            <li>✅ Inspect before paying</li>
+          </ul>
+        </div>
+        <button type="submit"
+                class="btn full-btn pay-submit-btn cod-btn"
+                onclick="setMethod('cod')">
+          🚚 Confirm Cash on Delivery
+        </button>
+      </div>
+      {% endif %}
+
+      <!-- ── CARD SECTION ── -->
+      <div class="method-section" id="section-card">
+
+        {% if pay_type == 'rent' %}
+        <div class="advance-notice">
+          ⚡ You are paying <strong>50% advance = ৳{{ advance }}</strong>
+          now. Remaining ৳{{ remaining }} paid on delivery.
+        </div>
+        {% endif %}
+
+        <div class="card-icons">
+          <div class="card-icon">VISA</div>
+          <div class="card-icon">MC</div>
+          <div class="card-icon">AMEX</div>
+        </div>
+
+        <!-- Card Name -->
+        <div class="field-group">
+          <label>👤 Cardholder Name</label>
+          {{ card_form.card_name }}
+          {% for e in card_form.card_name.errors %}
+            <span class="field-error">⚠ {{ e }}</span>
+          {% endfor %}
+        </div>
+
+        <!-- Card Number -->
+        <div class="field-group">
+          <label>💳 Card Number</label>
+          <div class="card-input-wrap">
+            {{ card_form.card_number }}
+            <span class="card-chip">💳</span>
+          </div>
+          {% for e in card_form.card_number.errors %}
+            <span class="field-error">⚠ {{ e }}</span>
+          {% endfor %}
+        </div>
+
+        <!-- Expiry + CVV -->
+        <div class="two-col">
+          <div class="field-group">
+            <label>📅 Expiry</label>
+            {{ card_form.expiry }}
+            {% for e in card_form.expiry.errors %}
+              <span class="field-error">⚠ {{ e }}</span>
+            {% endfor %}
+          </div>
+          <div class="field-group">
+            <label>🔒 CVV</label>
+            {{ card_form.cvv }}
+            {% for e in card_form.cvv.errors %}
+              <span class="field-error">⚠ {{ e }}</span>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="pay-amount-box">
+          <span>Amount to Pay Now</span>
+          <span class="pay-final-amount">
+            ৳{% if pay_type == 'rent' %}{{ advance }}{% else %}{{ amount }}{% endif %}
+          </span>
+        </div>
+
+        <button type="submit"
+                class="btn full-btn pay-submit-btn card-btn"
+                id="cardPayBtn"
+                onclick="setMethod('card')">
+          💳 Pay ৳{% if pay_type == 'rent' %}{{ advance }}{% else %}{{ amount }}{% endif %} by Card
+        </button>
+      </div>
+
+      <!-- ── BKASH SECTION ── -->
+      <div class="method-section" id="section-bkash">
+
+        {% if pay_type == 'rent' %}
+        <div class="advance-notice">
+          ⚡ You are paying <strong>50% advance = ৳{{ advance }}</strong>
+          now via bKash. Remaining ৳{{ remaining }} paid on delivery.
+        </div>
+        {% endif %}
+
+        <!-- bKash instructions -->
+        <div class="bkash-instruction-box">
+          <div class="bkash-logo-big">bKash</div>
+          <h4>How to pay via bKash</h4>
+          <ol class="bkash-steps">
+            <li>
+              Go to your bKash app or dial
+              <strong>*247#</strong>
+            </li>
+            <li>Select <strong>Send Money</strong></li>
+            <li>
+              Send
+              <strong>
+                ৳{% if pay_type == 'rent' %}{{ advance }}{% else %}{{ amount }}{% endif %}
+              </strong>
+              to merchant number:
+              <div class="bkash-merchant-number">
+                📱 01712-345678
+              </div>
+            </li>
+            <li>
+              Use reference:
+              <strong>{{ request.user.username }}</strong>
+            </li>
+            <li>
+              Copy the <strong>Transaction ID (TrxID)</strong>
+              from your bKash confirmation SMS
+            </li>
+            <li>Enter the details below and submit</li>
+          </ol>
+        </div>
+
+        <!-- bKash Form -->
+        <div class="field-group">
+          <label>📱 Your bKash Number</label>
+          {{ bkash_form.bkash_number }}
+          {% for e in bkash_form.bkash_number.errors %}
+            <span class="field-error">⚠ {{ e }}</span>
+          {% endfor %}
+        </div>
+
+        <div class="field-group">
+          <label>🔑 Transaction ID (TrxID)</label>
+          {{ bkash_form.bkash_txn_id }}
+          {% for e in bkash_form.bkash_txn_id.errors %}
+            <span class="field-error">⚠ {{ e }}</span>
+          {% endfor %}
+        </div>
+
+        <div class="pay-amount-box bkash-amount-box">
+          <span>Amount Sent via bKash</span>
+          <span class="pay-final-amount bkash-color">
+            ৳{% if pay_type == 'rent' %}{{ advance }}{% else %}{{ amount }}{% endif %}
+          </span>
+        </div>
+
+        <button type="submit"
+                class="btn full-btn pay-submit-btn bkash-btn"
+                id="bkashPayBtn"
+                onclick="setMethod('bkash')">
+          <span class="bkash-btn-logo">b</span>
+          Confirm bKash Payment
+        </button>
+      </div>
+
+      <!-- Cancel -->
+      <a href="/item/{{ item.pk }}/"
+         class="btn outline full-btn cancel-pay-btn">
+        ← Cancel & Go Back
+      </a>
+
+    </form>
+  </div>
+</div>
+
+<script>
+  // ── Tab switching ──────────────────────────────────────
+  function selectMethod(method) {
+    // hide all sections
+    document.querySelectorAll('.method-section')
+      .forEach(s => s.classList.remove('active'));
+    // remove active from all tabs
+    document.querySelectorAll('.method-tab')
+      .forEach(t => t.classList.remove('active'));
+    // remove all checks
+    document.querySelectorAll('.method-tab-check')
+      .forEach(c => c.textContent = '');
+
+    // show selected
+    const section = document.getElementById(
+      'section-' + method
+    );
+    if (section) section.classList.add('active');
+
+    const tab = document.getElementById('tab-' + method);
+    if (tab) tab.classList.add('active');
+
+    const check = document.getElementById(
+      'check-' + method
+    );
+    if (check) check.textContent = '✅';
+  }
+
+  function setMethod(method) {
+    document.getElementById('hiddenMethod').value = method;
+  }
+
+  // ── Auto-format card number ────────────────────────────
+  const cardNum = document.querySelector(
+    '[name="card-card_number"]'
+  );
+  if (cardNum) {
+    cardNum.addEventListener('input', function (e) {
+      let val = e.target.value
+        .replace(/\D/g, '').substring(0, 16);
+      let fmt = val.match(/.{1,4}/g);
+      e.target.value = fmt ? fmt.join(' ') : val;
+    });
+  }
+
+  // ── Auto-format expiry ────────────────────────────────
+  const expiry = document.querySelector(
+    '[name="card-expiry"]'
+  );
+  if (expiry) {
+    expiry.addEventListener('input', function (e) {
+      let val = e.target.value
+        .replace(/\D/g, '').substring(0, 4);
+      if (val.length >= 3) {
+        val = val.substring(0, 2) + '/' + val.substring(2);
+      }
+      e.target.value = val;
+    });
+  }
+
+  // ── Disable btn on submit ──────────────────────────────
+  document.getElementById('payForm')
+    .addEventListener('submit', function () {
+      const method = document.getElementById(
+        'hiddenMethod'
+      ).value;
+      if (!method) {
+        alert('Please select a payment method first.');
+        return false;
+      }
+      ['cardPayBtn', 'bkashPayBtn'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) {
+          btn.disabled = true;
+          btn.textContent = '⏳ Processing...';
+        }
+      });
+    });
+
+  // ── Auto-select first tab ──────────────────────────────
+  window.onload = function () {
+    {% if pay_type == 'buy' %}
+      selectMethod('cod');
+    {% else %}
+      selectMethod('card');
+    {% endif %}
+  };
+</script>
+
+{% endblock %}

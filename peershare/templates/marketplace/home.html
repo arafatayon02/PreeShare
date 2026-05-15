@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<!-- Hero -->
+<div class="hero">
+  <h1>🎓 Student Marketplace</h1>
+  <p>Rent, buy and sell items with verified students</p>
+  {% if not user.is_authenticated %}
+    <div class="hero-btns">
+      <a href="/login/register/" class="btn">Get Started →</a>
+      <a href="/login/" class="btn outline">Login</a>
+    </div>
+  {% endif %}
+</div>
+
+<!-- Search Bar -->
+<form method="GET" class="search-bar">
+  <input type="text" name="q"
+         value="{{ query }}"
+         placeholder="🔍 Search items...">
+  <select name="category">
+    <option value="">All Categories</option>
+    <option value="rent"
+      {% if category == 'rent' %}selected{% endif %}>
+      🔄 For Rent
+    </option>
+    <option value="sell"
+      {% if category == 'sell' %}selected{% endif %}>
+      🛒 For Sale
+    </option>
+    <option value="both"
+      {% if category == 'both' %}selected{% endif %}>
+      ✨ Rent & Sell
+    </option>
+  </select>
+  <button type="submit" class="btn">Search</button>
+  {% if query or category %}
+    <a href="/" class="btn outline">Clear</a>
+  {% endif %}
+</form>
+
+<!-- Results count -->
+{% if query or category %}
+<p class="results-count">
+  Found <strong>{{ items.count }}</strong> item(s)
+</p>
+{% endif %}
+
+<!-- Item Grid -->
+<div class="item-grid">
+  {% for item in items %}
+  <div class="card">
+    {% if item.image %}
+      <img src="{{ item.image.url }}" alt="{{ item.title }}">
+    {% else %}
+      <div class="no-image">📦</div>
+    {% endif %}
+    <div class="card-body">
+      <div class="card-top">
+        {% if item.category == 'rent' %}
+          <span class="badge badge-rent">🔄 Rent</span>
+        {% elif item.category == 'sell' %}
+          <span class="badge badge-sell">🛒 Sell</span>
+        {% else %}
+          <span class="badge badge-both">✨ Rent & Sell</span>
+        {% endif %}
+      </div>
+      <h3>{{ item.title }}</h3>
+      <p class="item-desc">
+        {{ item.description|truncatechars:65 }}
+      </p>
+      <div class="card-footer">
+        <span class="price">৳{{ item.price }}</span>
+        <a href="/item/{{ item.pk }}/" class="btn small">
+          View →
+        </a>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="empty-state">
+    <div class="empty-icon">😕</div>
+    <p>No items found.</p>
+    {% if user.is_authenticated %}
+      <a href="/add/" class="btn">Post the first item →</a>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock %}

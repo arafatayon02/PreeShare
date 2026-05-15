@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="page-head">
+  <div>
+    <h2>📦 My Posted Items</h2>
+    <p>Manage your listings</p>
+  </div>
+  <a href="/add/" class="btn">➕ Add New Item</a>
+</div>
+
+{% if my_items %}
+<div class="item-grid">
+  {% for item in my_items %}
+  <div class="card">
+
+    {% if item.image %}
+      <img src="{{ item.image.url }}" alt="{{ item.title }}">
+    {% else %}
+      <div class="no-image">📦</div>
+    {% endif %}
+
+    <div class="card-body">
+
+      <!-- Badge + availability -->
+      <div class="card-top-row">
+        <span class="badge
+          {% if item.category == 'rent' %}badge-rent
+          {% elif item.category == 'sell' %}badge-sell
+          {% else %}badge-both{% endif %}">
+          {{ item.get_category_display }}
+        </span>
+        {% if not item.is_available %}
+          <span class="sbadge sbadge-cancelled">Sold</span>
+        {% else %}
+          <span class="sbadge sbadge-active">Available</span>
+        {% endif %}
+      </div>
+
+      <h3>{{ item.title }}</h3>
+      <p class="item-desc">
+        {{ item.description|truncatechars:55 }}
+      </p>
+
+      <div class="card-footer">
+        <span class="price">৳{{ item.price }}</span>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="item-manage-btns">
+        <a href="/item/{{ item.pk }}/"
+           class="btn small">
+          👁 View
+        </a>
+        <a href="/item/{{ item.pk }}/delete/"
+           class="btn small delete-btn">
+          🗑️ Delete
+        </a>
+      </div>
+
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% else %}
+<div class="empty-state">
+  <div class="empty-icon">📦</div>
+  <p>No items posted yet.</p>
+  <a href="/add/" class="btn">Post Your First Item →</a>
+</div>
+{% endif %}
+
+{% endblock %}

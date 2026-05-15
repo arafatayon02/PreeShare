@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="detail-page">
+
+  <!-- Item Card -->
+  <div class="detail-card">
+    {% if item.image %}
+    <div class="detail-img-wrapper">
+      <img src="{{ item.image.url }}"
+        class="detail-img"
+        alt="{{ item.title }}">
+    </div>
+{% endif %}
+    <div class="detail-body">
+
+
+      <div class="detail-badges">
+        {% if item.category == 'rent' %}
+          <span class="badge badge-rent">🔄 For Rent</span>
+        {% elif item.category == 'sell' %}
+          <span class="badge badge-sell">🛒 For Sale</span>
+        {% else %}
+          <span class="badge badge-rent">🔄 Rent</span>
+          <span class="badge badge-sell">🛒 Sell</span>
+        {% endif %}
+        {% if not item.is_available %}
+          <span class="badge badge-unavail">❌ Unavailable</span>
+        {% endif %}
+      </div>
+
+      <h2 class="detail-title">{{ item.title }}</h2>
+      <p class="detail-desc">{{ item.description }}</p>
+
+      <div class="detail-price">
+        ৳{{ item.price }}
+        {% if can_rent %}
+          <small>/ day for rent</small>
+        {% endif %}
+      </div>
+
+      <div class="detail-owner">
+        <span>Posted by</span>
+        <a href="/user/{{ item.owner.username }}/">
+          👤 {{ item.owner.username }}
+        </a>
+        {% if not is_owner %}
+          <a href="/chat/{{ item.owner.pk }}/"
+             class="btn small">💬 Chat</a>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ACTION PANELS (not owner + available) -->
+  {% if not is_owner and item.is_available %}
+  <div class="action-grid">
+
+    <!-- BUY PANEL -->
+    {% if can_buy %}
+    <div class="action-panel buy-panel">
+      <div class="panel-head">
+        <span class="panel-icon">🛒</span>
+        <div>
+          <h3>Buy This Item</h3>
+          <p>Pay once, it's yours permanently</p>
+        </div>
+      </div>
+      <div class="panel-price">৳{{ item.price }}</div>
+      <form method="POST">
+        {% csrf_token %}
+        <label class="confirm-label">
+          <input type="checkbox" name="confirm" required>
+          I confirm I want to buy for ৳{{ item.price }}
+        </label>
+        <button name="submit_buy"
+                class="btn buy-btn full-btn">
+          🛒 Buy Now
+        </button>
+      </form>
+    </div>
+    {% endif %}
+
+    <!-- RENT PANEL -->
+    {% if can_rent %}
+    <div class="action-panel rent-panel">
+      <div class="panel-head">
+        <span class="panel-icon">📅</span>
+        <div>
+          <h3>Rent This Item</h3>
+          <p>Choose how many days you need it</p>
+        </div>
+      </div>
+      <div class="panel-price">
+        ৳{{ item.price }}<small>/day</small>
+      </div>
+      <form method="POST">
+        {% csrf_token %}
+        <div class="field-group">
+          <label>Number of Days</label>
+          <input type="number" name="days"
+                 min="1" max="365"
+                 placeholder="e.g. 7"
+                 oninput="calcRent(this.value)">
+        </div>
+        <div class="rent-calc" id="rentCalc">
+          <div class="calc-row">
+            <span>Per day</span>
+            <span>৳{{ item.price }}</span>
+          </div>
+          <div class="calc-row">
+            <span>Days</span>
+            <span id="cDays">—</span>
+          </div>
+          <div class="calc-row">
+            <span>Deposit (10%)</span>
+            <span id="cDeposit">—</span>
+          </div>
+          <div class="calc-row calc-total">
+            <span>Total</span>
+            <span id="cTotal">—</span>
+          </div>
+        </div>
+        <button name="submit_booking"
+                class="btn rent-btn full-btn">
+          📅 Confirm Booking
+        </button>
+      </form>
+    </div>
+    {% endif %}
+
+    <!-- CHAT PANEL -->
+    <div class="action-panel chat-panel">
+      <div class="panel-head">
+        <span class="panel-icon">💬</span>
+        <div>
+          <h3>Ask the Seller</h3>
+          <p>Chat before you decide</p>
+        </div>
+      </div>
+      <a href="/chat/{{ item.owner.pk }}/"
+         class="btn chat-btn full-btn">
+        💬 Message {{ item.owner.username }}
+      </a>
+    </div>
+
+  </div>
+  {% endif %}
+
+  <!-- Owner notice -->
+  {% if is_owner %}
+  <div class="owner-action-box">
+    <div class="owner-action-left">
+      <span class="owner-tag">📌 This is your item</span>
+      <p>You can manage or delete it from here.</p>
+    </div>
+    <div class="owner-action-btns">
+      <a href="/dashboard/items/"
+         class="btn small outline">
+        📊 Dashboard
+      </a>
+      <a href="/item/{{ item.pk }}/delete/"
+         class="btn small delete-btn">
+        🗑️ Delete Item
+      </a>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Unavailable notice -->
+  {% if not item.is_available %}
+  <div class="notice-box notice-red">
+    ❌ This item is no longer available.
+  </div>
+  {% endif %}
+
+  <!-- REVIEWS -->
+  <div class="reviews-box">
+    <h3>⭐ Reviews ({{ reviews.count }})</h3>
+
+    {% for r in reviews %}
+    <div class="review-card">
+      <div class="review-meta">
+        <a href="/user/{{ r.user.username }}/"
+           class="review-author">
+          <div class="avatar-mini">
+            {{ r.user.username|first|upper }}
+          </div>
+          <strong>{{ r.user.username }}</strong>
+        </a>
+        <div class="stars">
+          {% for i in "12345" %}
+            {% if forloop.counter <= r.rating %}⭐{% else %}☆{% endif %}
+          {% endfor %}
+        </div>
+        <small>{{ r.created_at|date:"d M Y" }}</small>
+      </div>
+      <p class="review-text">{{ r.comment }}</p>
+    </div>
+    {% empty %}
+      <p class="empty-msg">No reviews yet. Be the first!</p>
+    {% endfor %}
+
+    {% if user.is_authenticated and not is_owner %}
+    <div class="write-review">
+      <h4>Write a Review</h4>
+      <form method="POST">
+        {% csrf_token %}
+        {% for field in review_form %}
+        <div class="field-group">
+          <label>{{ field.label }}</label>
+          {{ field }}
+        </div>
+        {% endfor %}
+        <button name="submit_review"
+                class="btn small">⭐ Submit</button>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+
+<script>
+const pricePerDay = {{ item.price }};
+function calcRent(days) {
+  const d = parseInt(days);
+  if (!d || d < 1) {
+    document.getElementById('cDays').textContent    = '—';
+    document.getElementById('cTotal').textContent   = '—';
+    document.getElementById('cDeposit').textContent = '—';
+    return;
+  }
+  const total   = pricePerDay * d;
+  const deposit = total * 0.10;
+  document.getElementById('cDays').textContent
+    = d + ' day(s)';
+  document.getElementById('cTotal').textContent
+    = '৳' + total.toFixed(2);
+  document.getElementById('cDeposit').textContent
+    = '৳' + deposit.toFixed(2);
+}
+</script>
+
+{% endblock %}

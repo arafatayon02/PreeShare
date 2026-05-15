@@ -1,34 +1,49 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<div class="page-header">
-  <h2>👥 All Students</h2>
-  <p>Find and connect with other students</p>
+<div class="page-head">
+  <div>
+    <h2>👥 All Students</h2>
+    <p>Connect with verified students</p>
+  </div>
 </div>
 
+
 <form method="GET" class="search-bar">
-  <input type="text" name="q" value="{{ search }}" placeholder="🔍 Search by username...">
+  <input type="text" name="q"
+         value="{{ search }}"
+         placeholder="🔍 Search by username...">
   <button type="submit" class="btn">Search</button>
+  {% if search %}
+    <a href="/user/all/" class="btn outline">Clear</a>
+  {% endif %}
 </form>
 
 <div class="user-grid">
   {% for profile in profiles %}
   <div class="user-card">
     {% if profile.profile_pic %}
-      <img src="{{ profile.profile_pic.url }}" class="avatar" alt="pic">
+      <img src="{{ profile.profile_pic.url }}"
+           class="avatar-circle" alt="pic">
     {% else %}
-      <div class="avatar-placeholder">{{ profile.user.username|first|upper }}</div>
+      <div class="avatar-circle-placeholder">
+        {{ profile.user.username|first|upper }}
+      </div>
     {% endif %}
     <div class="user-card-info">
       <h4>{{ profile.user.username }}</h4>
       <p>🎓 {{ profile.get_university_display|default:"—" }}</p>
-      {% if profile.location %}<p>📍 {{ profile.location }}</p>{% endif %}
+      {% if profile.location %}
+        <p>📍 {{ profile.location }}</p>
+      {% endif %}
       <p>📦 {{ profile.get_total_items }} items</p>
     </div>
-    <div class="user-card-actions">
-      <a href="{% url 'public_profile' profile.user.username %}" class="btn small">View Profile</a>
+    <div class="user-card-btns">
+      <a href="/user/{{ profile.user.username }}/"
+         class="btn small">View Profile</a>
       {% if request.user.is_authenticated and request.user != profile.user %}
-        <a href="{% url 'chat' profile.user.pk %}" class="btn small outline">💬 Chat</a>
+        <a href="/chat/{{ profile.user.pk }}/"
+           class="btn small outline">💬 Chat</a>
       {% endif %}
     </div>
   </div>

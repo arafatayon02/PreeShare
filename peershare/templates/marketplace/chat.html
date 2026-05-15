@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="chat-page">
+
+  <div class="chat-topbar">
+    <div class="avatar-placeholder">
+      {{ other_user.username|first|upper }}
+    </div>
+    <div>
+      <h3>{{ other_user.username }}</h3>
+      <a href="/user/{{ other_user.username }}/"
+         class="view-profile-link">
+        View Profile →
+      </a>
+    </div>
+    <a href="/dashboard/chats/"
+       class="btn small outline ml-auto">
+      ← Back
+    </a>
+  </div>
+
+  <div class="chat-messages" id="chatBox">
+    {% for msg in msgs %}
+    <div class="bubble
+      {% if msg.sender == request.user %}bubble-me{% else %}bubble-them{% endif %}">
+      <p>{{ msg.message }}</p>
+      <small>{{ msg.timestamp|date:"H:i · d M" }}</small>
+    </div>
+    {% empty %}
+    <div class="chat-empty">
+      <p>👋 No messages yet. Say hello!</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  <form method="POST" class="chat-input">
+    {% csrf_token %}
+    {{ form.message }}
+    <button type="submit" class="btn">Send 📤</button>
+  </form>
+
+</div>
+
+<script>
+  const box = document.getElementById('chatBox');
+  box.scrollTop = box.scrollHeight;
+</script>
+
+{% endblock %}

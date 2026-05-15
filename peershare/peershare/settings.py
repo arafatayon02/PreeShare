@@ -3,11 +3,12 @@ import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-change-this-in-production-xyz123'
+SECRET_KEY = 'django-insecure-peershare-secret-key-change-in-production'
 
 DEBUG = True
 
 ALLOWED_HOSTS = []
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -19,6 +20,8 @@ INSTALLED_APPS = [
     'accounts',
     'marketplace',
     'user',
+    'login',
+    'dashboard',
 ]
 
 MIDDLEWARE = [
@@ -70,19 +73,15 @@ TIME_ZONE     = 'Asia/Dhaka'
 USE_I18N      = True
 USE_TZ        = True
 
-# ── Static Files ─────────────────────────────────────────
-STATIC_URL        = '/static/'
-STATICFILES_DIRS  = [BASE_DIR / 'static']
+STATIC_URL       = '/static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
 
-# ── Media Files ──────────────────────────────────────────
 MEDIA_URL  = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# ── Custom User ───────────────────────────────────────────
-AUTH_USER_MODEL = 'accounts.CustomUser'
+AUTH_USER_MODEL     = 'accounts.CustomUser'
+DEFAULT_AUTO_FIELD  = 'django.db.models.BigAutoField'
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# ── Login Redirects ───────────────────────────────────────
-LOGIN_URL          = '/accounts/login/'
-LOGIN_REDIRECT_URL = '/'
+LOGIN_URL           = '/login/'
+LOGIN_REDIRECT_URL  = '/dashboard/'
+LOGOUT_REDIRECT_URL = '/login/'
