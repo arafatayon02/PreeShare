@@ -1,0 +1,1 @@
+web: cd peershare && gunicorn peershare.wsgi --bind 0.0.0.0:$PORT

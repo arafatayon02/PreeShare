@@ -3,12 +3,6 @@ import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-peershare-secret-key-change-in-production'
-
-DEBUG = True
-
-ALLOWED_HOSTS = []
-
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -32,6 +26,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'peershare.urls'
@@ -85,3 +81,17 @@ DEFAULT_AUTO_FIELD  = 'django.db.models.BigAutoField'
 LOGIN_URL           = '/login/'
 LOGIN_REDIRECT_URL  = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/login/'
+
+import os
+
+# Replace the SECRET_KEY line with:
+SECRET_KEY = os.environ.get('SECRET_KEY', 'your-default-dev-key')
+
+# Replace DEBUG = True with:
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+
+# Replace ALLOWED_HOSTS = [] with:
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
